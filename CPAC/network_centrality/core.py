@@ -191,3 +191,23 @@ def fast_eigenvector_centrality(m, maxiter=99, verbose=True):
     # now the vcurr value will be the ECM
     return vcurr
  
+
+
+def localClusterCoefficient(G, Node):
+    neighbours = G.adj[Node].keys()
+    edges = 0
+    for u in neighbours:
+        for v in neighbours:
+            if v in G[u]:
+                # each edge contributes twice
+                edges = edges + 0.5
+
+    # C = \frac{1}{n} \sum_{i\in N} C_i = \frac{1}{n} \sum_{n \in N} \frac{2t_i}{k_i(k_i-1)} according to Table A1 in [2]           
+    return (2.0*edges/(len(neighbours)*len(neighbours)-1))
+
+
+
+def globalClusterCoefficient(G):
+    # computer average over all local cluster coefficients
+    localCC = [localClusterCoefficient(G, nodes) for nodes in G.adj.keys()]
+    return sum(localCC)/len(G)   
