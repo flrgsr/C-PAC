@@ -193,12 +193,12 @@ def fast_eigenvector_centrality(m, maxiter=99, verbose=True):
  
 
 
-def localClusterCoefficient(G, Node):
-    neighbours = G.adj[Node].keys()
+def localClusterCoefficient(matrix, node):
+    neighbours = matrix[:][node]
     edges = 0
     for u in neighbours:
         for v in neighbours:
-            if v in G[u]:
+            if v in matrix[u]:
                 # each edge contributes twice
                 edges = edges + 0.5
 
@@ -207,7 +207,7 @@ def localClusterCoefficient(G, Node):
 
 
 
-def globalClusterCoefficient(G):
+def globalClusterCoefficient(matrix):
     # computer average over all local cluster coefficients
-    localCC = [localClusterCoefficient(G, nodes) for nodes in G.adj.keys()]
+    localCC = [localClusterCoefficient(matrix, nodes) for nodes in matrix[:][:end]]
     return sum(localCC)/len(G)   
