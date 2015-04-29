@@ -33,3 +33,10 @@ pip-log.txt
 #Eclipse project files
 .project
 .pydevproject
+
+#OS X DS_Store
+.DS_Store
+
+## C extensions (Cython)
+*.so
+*.c
