@@ -319,6 +319,7 @@ def get_centrality_by_rvalue(ts_normd,
     calc_degree = False
     calc_eigen = False
     calc_lfcd = False
+    calc_closeness = False
     # Select which method we're going to perform
     if method_option == 0:
         calc_degree = True
@@ -326,6 +327,8 @@ def get_centrality_by_rvalue(ts_normd,
         calc_eigen = True
     elif method_option == 2:
         calc_lfcd = True
+    elif method_option == 3:
+        calc_closeness = True
     # Weighting
     out_binarize = weight_options[0]
     out_weighted = weight_options[1]
@@ -361,6 +364,12 @@ def get_centrality_by_rvalue(ts_normd,
         if out_weighted:
             lfcd_weighted = np.zeros(nvoxs, dtype=ts_normd.dtype)
             out_list.append(('lfcd_weighted', lfcd_weighted))
+    if calc_closeness:
+        if out_binarize:
+            closeness_binarize = np.zeros(nvoxs, dtype=ts_normd.dtype)
+            out_list.append(('closeness_centrality_binarize', closeness_binarize))
+        else:
+            pass
     
     # Prepare to loop through and calculate correlation matrix
     n = 0
@@ -407,6 +416,11 @@ def get_centrality_by_rvalue(ts_normd,
                     else:
                         lfcd = 1
                     lfcd_weighted[n+k] = lfcd
+
+        if calc_closeness:
+            r_matrix[n:m] = rmat_block
+
+
         
         # Delete block of corr matrix and increment indices
         del rmat_block
@@ -447,6 +461,10 @@ def get_centrality_by_rvalue(ts_normd,
                 eigen_weighted[:] = eigenvector_centrality(r_matrix, 
                                                            r_value, 
                                                            method='weighted').squeeze()
+        elif calc_closeness:
+            print "...calculating closeness centrality"
+            closenessResult = closenessCentrality(r_matrix, r_value).squeeze() 
+
             del r_matrix
         
     except Exception:

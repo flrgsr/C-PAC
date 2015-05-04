@@ -1,5 +1,20 @@
 # coding: utf-8
 
+
+import networkx as nx
+
+
+def constructGraph(corr_matrix, r_value=None):
+    nativeCallback = "centrality_binarize_float"
+    funcHandle     = globals()[nativeCallback]
+    funcHandle(corr_matrix, graphStructure, r_value)
+    
+    return graphStructure
+
+def closenessCentrality(corr_matrix, r_value):
+    graphStructure = constructGraph(corr_matrix, r_value)
+    return nx.from_numpy_matrix(graphStructure)
+
 """
 These are function nodes of sorts that compute a centrality measure.
 """
