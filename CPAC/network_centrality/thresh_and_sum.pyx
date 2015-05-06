@@ -2,7 +2,7 @@ cimport numpy as np
 
 
 ###
-# Just Threshold (Pour Eigenvector Centrality)
+# Just Threshold (Pofunur Eigenvector Centrality)
 ###
 
 # Un-Weighted and Threshold
@@ -102,3 +102,10 @@ def centrality_both_double(np.ndarray[double, ndim=2] cmat, np.ndarray[double, n
         for j in xrange(cmat.shape[1]):
             cent_bin[i] += cmat[i,j]*(cmat[i,j] > thresh)
             cent_wt[i]  += 1.0*(cmat[i,j] > thresh)
+
+def clusterCoefficient(np.ndarray[float, ndim=2] cmat, np.ndarray[float, ndim=1] centCluster, float thresh):
+    cdef unsigned int vertex, u, w
+    for vertex in xrange(cmat.shape[0]):
+        for u in xrange(cmat.shape[1]):
+            for w in xrange(cmat.shape[1]):
+                centCluster[vertex] += 1/2 * (cmat[u, w] > thresh)
