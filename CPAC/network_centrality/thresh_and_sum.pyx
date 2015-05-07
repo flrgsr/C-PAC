@@ -103,13 +103,17 @@ def centrality_both_double(np.ndarray[double, ndim=2] cmat, np.ndarray[double, n
             cent_bin[i] += cmat[i,j]*(cmat[i,j] > thresh)
             cent_wt[i]  += 1.0*(cmat[i,j] > thresh)
 
-def clusterCoefficient(np.ndarray[float, ndim=2] cmat, np.ndarray[float, ndim=1] centCluster, float thresh):
-    """ Local cluster coefficient
+def global_cluster_coefficient(np.ndarray[float, ndim=2] cmat, np.ndarray[float, ndim=1] centCluster, float thresh):
+    """ Global Cluster Coefficient
         To make this fucntion available the Cython code has to be compiled via
         ./setup.py build_ext --inplace    
     """
-    cdef unsigned int vertex, u, w
-    for vertex in xrange(cmat.shape[0]):
-        for u in xrange(cmat.shape[1]):
-            for w in xrange(cmat.shape[1]):
-                centCluster[vertex] += 1/2 * (cmat[u, w] > thresh)
+    cdef unsigned int i, j, k
+    for i in xrange(cmat.shape[0]):
+        for j in xrange(cmat.shape[1]):
+            # cmat[i,j] = 1 * (cmat[i,j] > thresh)
+            if cmat[i, j] == 1:
+                for k in xrange(cmat.shape[1]):
+                    if ((cmat[i, k] == 1) and (cmat[j, k] == 1)):
+                        centCluster[i] += 1/2
+                    
