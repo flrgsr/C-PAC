@@ -18,12 +18,12 @@ def create_community_workflow(wf_name="community_detection_workflow"):
 	
 	# main entry point instance
 	handle_detect_communities = pe.Node(util.Function(input_names = ['datafile',
-															 'template', 
-															 'threshold', 
-															 'allocated_memory'], 
-												output_names = ['out_list'], 
-												function = detect_communities), 
-												name='handle_detect_communities')
+																	'template', 
+																	'threshold', 
+																	'allocated_memory'], 
+																	output_names = ['out_list'], 
+																	function = detect_communities), 
+																	name='handle_detect_communities')
 
 
 	# connect inputspec node with main function node
@@ -118,7 +118,7 @@ def build_correlation_matrix(ts_normd,
     func_handle = globals()[func_name]
     func_handle(r_matrix, thresh)      
 
-return r_matrix
+	return r_matrix
 
 def build_graph(adjacenyMatrix):
 	G = nx.from_numpy_matrix(adjacenyMatrix)
