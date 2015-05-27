@@ -1,3 +1,6 @@
+import numpy as np
+import networkx as nx
+
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 
@@ -14,13 +17,13 @@ def create_community_workflow(wf_name="community_detection_workflow"):
 	inputspec = pe.Node(util.IdentityInterface(fields=['subject', 'template', 'threshold'])															
 	
 	# main entry point instance
-	detect_communities = pe.Node(util.Function(input_names = ['datafile',
+	handle_detect_communities = pe.Node(util.Function(input_names = ['datafile',
 															 'template', 
 															 'threshold', 
 															 'allocated_memory'], 
 												output_names = ['out_list'], 
 												function = detect_communities), 
-												name='detect_communities')
+												name='handle_detect_communities')
 
 
 	# connect inputspec node with main function node
@@ -56,10 +59,14 @@ def detect_communities(datafile, template, threshold, allocated_memory):
 	block_size = calc_blocksize(ts, memory_allocated=allocated_memory, include_full_matrix=True)
 	ts_normalized = norm_cols(ts.T)
 
+	# build correlation matrix and binarize to get adjaceny matrix
+	corr_matrix = build_correlation_matrix(ts_normalized, template, threshold, block_size)
+	# buold graph from adjacendy matrix
+	G = build_graph(corr_matrix)
 
 def build_correlation_matrix(ts_normd, 
                              template, 
-                             r_value, 
+                             thresh, 
                              block_size):
       
     # Init variables
@@ -106,14 +113,17 @@ def build_correlation_matrix(ts_normd,
         block_no += 1
     
     
-    
     #call out to cython code to binarize correlation matrix
- 	r_matrix, r_value, 
-          
+    func_name = "thresh_binarize_float"
+    func_handle = globals()[func_name]
+    func_handle(r_matrix, thresh)      
 
-    del r_matrix
-            
-    # Return list of outputs
-    return out_list
+return r_matrix
+
+def build_graph(adjacenyMatrix):
+	G = nx.from_numpy_matrix(adjacenyMatrix)
+
+	return G
+ 
 
 
