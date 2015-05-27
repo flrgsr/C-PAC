@@ -14,24 +14,23 @@ def create_community_workflow(wf_name="community_detection_workflow"):
 	wf = pe.Workflow(name=wf_name)
 	
 	# populate inputspec node
-	inputspec = pe.Node(util.IdentityInterface(fields=['subject', 'template', 'threshold'])															
+	inputspec = pe.Node(util.IdentityInterface(fields=['subject', 'template', 'threshold']), name='inputspec')														
 	
 	# main entry point instance
-	handle_detect_communities = pe.Node(util.Function(input_names = ['datafile', 'template', 'threshold', 'allocated_memory'], output_names = ['out_list'], function = detect_communities), name='handle_detect_communities')
+	handle_detect_communities = pe.Node(util.Function(input_names = ['datafile', 'template', 'threshold', 'allocated_memory'], output_names = ['test'], function = detect_communities), name='handle_detect_communities')
 
 
 	# connect inputspec node with main function node
-	wf.connect(inputspec, 'subject', 
-		       detect_communities, 'datafile')
+	wf.connect(inputspec, 'subject', handle_detect_communities, 'datafile')
 
 	wf.connect(inputspec, 'template',
-		       detect_communities, template)
+		       handle_detect_communities, template)
 
 	wf.connect(inputspec, 'threshold',
-		       detect_communities, 'threshold')
+		       handle_detect_communities, 'threshold')
 
 	# specify allocated memory from workflow input to function node
-	detect_communities.inputs.allocated_memory = allocated_memory
+	handle_detect_communities.inputs.allocated_memory = allocated_memory
 
 	# populate outputspec noode
 	outputspec = pe.Node(util.IdentityInterface(fields= ['community_outputs', 
@@ -69,12 +68,7 @@ def build_correlation_matrix(ts_normd,
  
  
     r_matrix = np.zeros((nvoxs,nvoxs), dtype=ts_normd.dtype)
-    
-    # binary weighting, init output map
-	eigen_binarize = np.zeros(nvoxs, dtype=ts_normd.dtype)
-            out_list.append(('eigenvector_centrality_binarize', eigen_binarize))
-    
-
+      
     # Prepare to loop through and calculate correlation matrix
     n = 0
     m = block_size
@@ -110,9 +104,9 @@ def build_correlation_matrix(ts_normd,
     #call out to cython code to binarize correlation matrix
     func_name = "thresh_binarize_float"
     func_handle = globals()[func_name]
-    func_handle(r_matrix, thresh)      
+    func_handle(r_matrix, thresh)
 
-	return r_matrix
+    return r_matrix
 
 def build_graph(adjacenyMatrix):
 	G = nx.from_numpy_matrix(adjacenyMatrix)
