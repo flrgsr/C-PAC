@@ -36,3 +36,7 @@ pip-log.txt
 
 #OS X DS_Store
 .DS_Store
+
+## C extensions (Cython)
+*.so
+*.c
