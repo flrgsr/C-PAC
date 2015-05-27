@@ -17,7 +17,7 @@ def create_community_workflow(wf_name="community_detection_workflow"):
 	inputspec = pe.Node(util.IdentityInterface(fields=['subject', 'template', 'threshold']), name='inputspec')														
 	
 	# main entry point instance
-	handle_detect_communities = pe.Node(util.Function(input_names = ['datafile', 'template', 'threshold', 'allocated_memory'], output_names = ['test'], function = detect_communities), name='handle_detect_communities')
+	handle_detect_communities = pe.Node(util.Function(input_names = ['datafile', 'template', 'threshold', 'allocated_memory'], output_names = ['out_list'], function = detect_communities), name='handle_detect_communities')
 
 
 	# connect inputspec node with main function node
