@@ -107,8 +107,9 @@ def build_correlation_matrix(ts_normd,
     
     
     
-    eigen_binarize[:] = eigenvector_centrality(r_matrix, r_value, 
-                        method='binarize').squeeze()
+    #call out to cython code to binarize correlation matrix
+ 	r_matrix, r_value, 
+          
 
     del r_matrix
             
