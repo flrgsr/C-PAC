@@ -2,7 +2,7 @@ import os
 import nibabel as nib
 import numpy as np
 
-def load(datafile, template=None):
+def loadNifti(datafile, template=None):
     '''
     Method to read data from datafile and mask/parcellation unit
     and store the mask data, timeseries, affine matrix, mask type

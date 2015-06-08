@@ -4,13 +4,13 @@ import networkx as nx
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 
-import cdutils 
 from CPAC.network_centrality.utils import calc_blocksize
 from CPAC.cwas.subdist import norm_cols
 
 from CPAC.network_centrality.thresh_and_sum import *
 
 import louvain
+import os
 
 def create_community_workflow(wf_name="community_detection_workflow", allocated_memory = None):
 
@@ -35,7 +35,7 @@ def create_community_workflow(wf_name="community_detection_workflow", allocated_
 	handle_detect_communities.inputs.allocated_memory = allocated_memory
 
 	# populate outputspec noode
-	outputspec = pe.Node(util.IdentityInterface(fields= ['community_outputs', 'threshold_matrix','correlation_matrix','graph_outputs']), name = 'outputspec')
+	outputspec = pe.Node(util.IdentityInterface(fields= ['community_outputs']), name = 'outputspec')
 	
 	# connect outputspec node with main function node
 	wf.connect(handle_detect_communities, 'out_list', outputspec, 'community_outputs')
@@ -44,8 +44,24 @@ def create_community_workflow(wf_name="community_detection_workflow", allocated_
 	return wf
 
 def detect_communities(datafile, template, threshold, allocated_memory):
+
+	import CPAC.community_detection.cdutils as cdu 
+	from CPAC.network_centrality.utils import calc_blocksize
+	from CPAC.cwas.subdist import norm_cols
+	from CPAC.community_detection import build_correlation_matrix
+	from CPAC.community_detection import build_graph
+	import CPAC.community_detection.louvain as lou
+
+	from CPAC.network_centrality.thresh_and_sum import *
+
+	import os
+
+	import numpy as np
+	import networkx as nx
+
+
 	out_list = []
-	ts, aff, mask, t_type, scans = cdutils.load(datafile, template)
+	ts, aff, mask, t_type, scans = cdu.loadNifti(datafile, template)
 
 	block_size = calc_blocksize(ts, memory_allocated=allocated_memory, include_full_matrix=True)
 	ts_normalized = norm_cols(ts.T)
@@ -53,13 +69,26 @@ def detect_communities(datafile, template, threshold, allocated_memory):
 	# build correlation matrix and binarize to get adjaceny matrix
 	corr_matrix = build_correlation_matrix(ts_normalized, threshold, block_size)
 	# buold graph from adjacendy matrix
+	print 'Building graph'
+
 	G = build_graph(corr_matrix)
 
-	partition = louvain.best_partition(G)
+	print 'Find best partition'
+	partition = lou.best_partition(G)
 
 	print float(len(set(partition.values())))
 
-	return G, partition
+	nx.set_node_attributes(G, 'community', partition)
+
+	out_list.append(('serializedGraph', G))
+	out_file, graph = out_list[0]
+	out_file = os.path.join(os.getcwd(), out_file + '.graphml')
+
+	print 'Serializing graph with annotaed detected communites to disk in GraphML format...' + os.getcwd(), out_file
+
+	nx.write_graphml(G, out_file)
+
+	return out_list
 
 def build_correlation_matrix(ts_normd, 
 							 thresh, 
